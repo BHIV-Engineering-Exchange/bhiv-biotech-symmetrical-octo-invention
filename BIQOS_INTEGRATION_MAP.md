@@ -12,7 +12,7 @@
 
 
 
-## 1. Purpose
+## 1\. Purpose
 
 
 
@@ -24,7 +24,7 @@ The objective is to connect evidence collection, provenance, structured validati
 
 
 
-## 2. Current Workstream Assets
+## 2\. Current Workstream Assets
 
 
 
@@ -52,7 +52,7 @@ The objective is to connect evidence collection, provenance, structured validati
 
 
 
-## 3. BIQOS Component Integration
+## 3\. BIQOS Component Integration
 
 
 
@@ -78,7 +78,7 @@ The objective is to connect evidence collection, provenance, structured validati
 
 
 
-## 4. Proposed Integration Workflow
+## 4\. Proposed Integration Workflow
 
 
 
@@ -96,7 +96,7 @@ The objective is to connect evidence collection, provenance, structured validati
 
 
 
-## 5. Integration Architecture
+## 5\. Integration Architecture
 
 
 
@@ -132,7 +132,7 @@ Proposed BIQOS Integration
 
 
 
-## 6. Important Data and Governance Requirements
+## 6\. Important Data and Governance Requirements
 
 
 
@@ -160,7 +160,7 @@ The mapping layer must not silently convert one evidence category into another o
 
 
 
-## 7. Priority Integration Gaps
+## 7\. Priority Integration Gaps
 
 
 
@@ -184,7 +184,7 @@ The mapping layer must not silently convert one evidence category into another o
 
 
 
-## 8. Recommended Next Product Increment
+## 8\. Recommended Next Product Increment
 
 
 
@@ -212,7 +212,7 @@ The next increment should:
 
 
 
-## 9. Scientific and Operational Boundaries
+## 9\. Scientific and Operational Boundaries
 
 
 

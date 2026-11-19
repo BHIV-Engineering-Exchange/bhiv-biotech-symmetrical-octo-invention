@@ -12,7 +12,7 @@
 
 
 
-## 1. Purpose
+## 1\. Purpose
 
 
 
@@ -34,7 +34,7 @@ The assessment is based on the existing QC engine, evidence framework, schema, a
 
 
 
-## 2. Domain-wise maturity assessment
+## 2\. Domain-wise maturity assessment
 
 
 
@@ -202,7 +202,7 @@ Development gaps:
 
 
 
-## 3. Comparative maturity table
+## 3\. Comparative maturity table
 
 
 
@@ -220,7 +220,7 @@ Development gaps:
 
 
 
-## 4. Evidence and verification status
+## 4\. Evidence and verification status
 
 
 
@@ -240,7 +240,7 @@ The evidence framework separately contains a Curcuma longa evidence-mapping exer
 
 
 
-## 5. Recommended development priorities
+## 5\. Recommended development priorities
 
 
 
@@ -278,7 +278,7 @@ The evidence framework separately contains a Curcuma longa evidence-mapping exer
 
 
 
-## 6. Overall assessment
+## 6\. Overall assessment
 
 
 
@@ -298,7 +298,7 @@ The next product increment should be a unified Pharmaceutical Evidence Quality I
 
 
 
-## 7. Scientific and regulatory boundary
+## 7\. Scientific and regulatory boundary
 
 
 

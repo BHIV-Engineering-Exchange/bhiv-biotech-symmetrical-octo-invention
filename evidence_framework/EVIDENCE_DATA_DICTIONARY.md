@@ -2,7 +2,7 @@
 
 
 
-## 1. Purpose
+## 1\. Purpose
 
 
 
@@ -10,7 +10,7 @@ This document defines the fields used in the Pharmaceutical Scientific Evidence 
 
 
 
-## 2. Source Register — source\_register.csv
+## 2\. Source Register — source\_register.csv
 
 
 
@@ -44,7 +44,7 @@ This document defines the fields used in the Pharmaceutical Scientific Evidence 
 
 
 
-## 3. Evidence Map — evidence\_map.csv
+## 3\. Evidence Map — evidence\_map.csv
 
 
 
@@ -82,7 +82,7 @@ This document defines the fields used in the Pharmaceutical Scientific Evidence 
 
 
 
-## 4. Claim Traceability — claim\_traceability.csv
+## 4\. Claim Traceability — claim\_traceability.csv
 
 
 
@@ -110,7 +110,7 @@ This document defines the fields used in the Pharmaceutical Scientific Evidence 
 
 
 
-## 5. Contradiction Register — contradiction\_register.csv
+## 5\. Contradiction Register — contradiction\_register.csv
 
 
 
@@ -146,7 +146,7 @@ This document defines the fields used in the Pharmaceutical Scientific Evidence 
 
 
 
-## 6. Evidence Category Values
+## 6\. Evidence Category Values
 
 
 
@@ -178,7 +178,7 @@ These categories describe evidence types. They should not be confused with pharm
 
 
 
-## 7. Evidence Strength Values
+## 7\. Evidence Strength Values
 
 
 
@@ -204,7 +204,7 @@ These are structured labels. They should not be presented as a formal GRADE asse
 
 
 
-## 8. Identifier Relationships
+## 8\. Identifier Relationships
 
 
 
@@ -224,7 +224,7 @@ Each identifier should remain unique within its respective register.
 
 
 
-## 9. Data Integrity Rules
+## 9\. Data Integrity Rules
 
 
 
@@ -244,7 +244,7 @@ Each identifier should remain unique within its respective register.
 
 
 
-## 10. Scope Limitations
+## 10\. Scope Limitations
 
 
 

@@ -241,3 +241,36 @@ def test_process_dataset_applies_json_schema_validation():
         result["results"][0]["evidence_quality"]
         == "INSUFFICIENT"
     )
+
+def test_malformed_string_record_is_rejected_safely():
+    result = process_dataset(["not a JSON object"])
+
+    item = result["results"][0]
+
+    assert item["validation"]["valid"] is False
+    assert item["evidence_quality"] == "INSUFFICIENT"
+    assert item["human_review_required"] is True
+
+
+def test_none_record_is_rejected_safely():
+    result = process_dataset([None])
+
+    item = result["results"][0]
+
+    assert item["validation"]["valid"] is False
+    assert item["evidence_quality"] == "INSUFFICIENT"
+    assert item["human_review_required"] is True
+
+
+def test_invalid_field_types_are_rejected_safely():
+    record = make_complete_record()
+    record["evidence_id"] = ["invalid"]
+    record["study_id"] = ["invalid"]
+
+    result = process_dataset([record])
+
+    item = result["results"][0]
+
+    assert item["validation"]["valid"] is False
+    assert item["evidence_quality"] == "INSUFFICIENT"
+    assert item["human_review_required"] is True

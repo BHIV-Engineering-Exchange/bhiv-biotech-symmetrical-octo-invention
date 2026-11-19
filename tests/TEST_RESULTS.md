@@ -1,3 +1,4 @@
+
 # Test Results
 
 ## Project
@@ -7,7 +8,7 @@ BHIV Biotech - Biosimilarity & Preclinical Evidence QC Engine
 python -m pytest -q
 
 ## Latest Test Result
-28 passed
+31 passed
 
 ## Verification Status
 PASS
@@ -18,8 +19,12 @@ PASS
 - Intentionally invalid evidence records: Correctly detected
 - Runtime JSON Schema validation: PASSED
 - process_dataset() integration: PASSED
+- Malformed string records: Safely rejected
+- None records: Safely rejected
+- Invalid field types: Safely rejected
 
 ## Quality Control Verification
+
 The automated test suite verifies:
 
 1. Evidence record validation.
@@ -30,6 +35,8 @@ The automated test suite verifies:
 6. Human review requirements.
 7. JSON Schema validation.
 8. Runtime schema integration.
+9. Safe handling of malformed records.
+10. Rejection of invalid field types.
 
 ## Important Data Declaration
 
@@ -41,6 +48,7 @@ This software validation does not establish biosimilarity,
 clinical equivalence, safety, efficacy, or regulatory validity.
 
 ## Final Verification
-All 28 automated tests passed successfully.
+
+All 31 automated tests passed successfully.
 
 Verification Status: PASS
