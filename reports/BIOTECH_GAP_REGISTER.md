@@ -57,6 +57,13 @@ The following capabilities are documented.
 | Deterministic repeatability testing | Supported |
 | Reported records processed | 11 |
 | Output file writing | Successful |
+| Evidence tracker interfaces | Python functions, CSV input, JSON output |
+| React/Python integration | Not implemented |
+| HTTP API implementation | Not found in source |
+| Cross-project adapter | Not implemented |
+| Frontend build | Successful |
+| Frontend tests | 6 passed |
+| Python tests | 24 passed |
 
 ## 4. Gap Register
 
@@ -132,7 +139,7 @@ Do not claim API-driven execution until verified in the source code.
 
 **Priority:** P1
 
-**Status:** Architectural clarification required.
+**Status:** Verified boundary: no HTTP API or React/Python integration is present.
 
 ---
 
