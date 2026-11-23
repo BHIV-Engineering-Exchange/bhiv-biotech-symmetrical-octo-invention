@@ -51,8 +51,8 @@ TMS strategy alignment must not be interpreted as:
 - Sample implementation: Working
 - Contradiction handling: Demonstrated
 - Structured JSON output: Demonstrated
-- DEP package: In progress
-- Final review: Pending
+- DEP package: Complete
+- Final review: Complete for the locally available framework and evidence package
 
 ## Handover Principle
 

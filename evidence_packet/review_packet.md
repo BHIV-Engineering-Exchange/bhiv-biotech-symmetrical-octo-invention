@@ -4,7 +4,7 @@
 
 The primary execution entry point for the sample implementation is:
 
-`code_packet/evidence_tracker.py`
+`evidence_packet/code_packet/evidence_tracker.py`
 
 The program reads structured evidence data from the `evidence_framework/` directory and produces a structured JSON output in:
 
@@ -168,7 +168,7 @@ The runtime result explicitly preserves the following quality controls:
 
 The review implementation file is:
 
-`code_packet/evidence_tracker.py`
+`evidence_packet/code_packet/evidence_tracker.py`
 
 This file contains the executable evidence-tracking demonstration.
 
@@ -202,4 +202,4 @@ Unknown information remains explicitly unknown.
 From the repository root, execute:
 
 ```text
-python .\code_packet\evidence_tracker.py
+python .\evidence_packet\code_packet\evidence_tracker.py

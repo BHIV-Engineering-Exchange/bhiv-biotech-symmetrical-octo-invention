@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 FRAMEWORK_DIR = BASE_DIR / "evidence_framework"
 
 EVIDENCE_FILE = FRAMEWORK_DIR / "evidence_map.csv"
@@ -11,6 +11,14 @@ CLAIM_FILE = FRAMEWORK_DIR / "claim_traceability.csv"
 CONTRADICTION_FILE = FRAMEWORK_DIR / "contradiction_register.csv"
 
 OUTPUT_FILE = BASE_DIR / "sample_implementation" / "sample_output.json"
+
+
+def safe_input(prompt=""):
+    """Read input safely when stdin is unavailable."""
+    try:
+        return input(prompt).strip()
+    except EOFError:
+        return ""
 
 
 def load_csv(file_path):
@@ -126,10 +134,10 @@ def main():
     show_evidence(evidence_records)
 
     # Search test
-    selected_id = input(
+    selected_id = safe_input(
         "\nEnter an evidence ID to inspect "
         "(example: EV-004, or press Enter to skip): "
-    ).strip()
+    )
 
     if selected_id:
         record = search_evidence(evidence_records, selected_id)
@@ -142,10 +150,10 @@ def main():
             print("\nEvidence record not found.")
 
     # Category filter
-    category = input(
+    category = safe_input(
         "\nEnter evidence category to filter "
         "(example: META_ANALYSIS, or press Enter to skip): "
-    ).strip()
+    )
 
     if category:
         filtered = filter_by_category(evidence_records, category)
@@ -163,11 +171,11 @@ def main():
             print("No records found for this category.")
 
     # Strength filter
-    strength = input(
+    strength = safe_input(
         "\nEnter evidence strength to filter "
         "(HIGH, MODERATE, LOW, INSUFFICIENT, UNKNOWN; "
         "or press Enter to skip): "
-    ).strip()
+    )
 
     if strength:
         filtered = filter_by_strength(evidence_records, strength)

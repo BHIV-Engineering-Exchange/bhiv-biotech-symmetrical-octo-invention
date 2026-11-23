@@ -101,7 +101,7 @@ The framework must not fill missing evidence with assumptions, generated citatio
 - Contradiction register: Implemented
 - Evidence-strength classification: Implemented
 - Structured JSON output: Implemented
-- Final provenance review: Pending
+- Final provenance review: Complete for the locally available public evidence register
 
 ## Quality Principle
 
