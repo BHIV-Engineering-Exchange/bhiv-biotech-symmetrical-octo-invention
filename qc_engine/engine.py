@@ -20,7 +20,8 @@ import argparse
 import json
 from pathlib import Path
 from typing import Any
-
+from functools import lru_cache
+from jsonschema import Draft202012Validator
 
 ENGINE_VERSION = "1.0.0"
 SCHEMA_VERSION = "1.0.0"
@@ -108,68 +109,66 @@ CONTENT_FIELDS = [
 ]
 
 
+
+
+@lru_cache(maxsize=1)
+def get_schema_validator():
+    schema_path = (
+        Path(__file__).resolve().parent.parent
+        / "schemas"
+        / "evidence_qc_schema_v1.0.0.json"
+    )
+
+    with open(schema_path, encoding="utf-8") as file:
+        schema = json.load(file)
+
+    Draft202012Validator.check_schema(schema)
+
+    return Draft202012Validator(schema)
+
+
 def _blank(value: Any) -> bool:
     """Return True when a value is missing or blank."""
     return value is None or value == ""
 
 
-def validate_record(record: dict[str, Any]) -> dict[str, Any]:
+
+def validate_record(record: Any) -> dict[str, Any]:
     """
     Validate one evidence record.
 
     Returns structured validation information without making
     scientific conclusions.
     """
-    errors: list[str] = []
-
     if not isinstance(record, dict):
         return {
             "valid": False,
             "errors": ["Record must be a JSON object."],
         }
 
-    for field in REQUIRED_FIELDS:
-        if field not in record:
-            errors.append(f"Missing required field: {field}")
+    errors: list[str] = []
+
+    schema_validator = get_schema_validator()
+
+    schema_errors = sorted(
+        schema_validator.iter_errors(record),
+        key=lambda error: str(error.path),
+    )
+
+    for error in schema_errors:
+        location = ".".join(
+            str(part) for part in error.path
+        ) or "<record>"
+
+        errors.append(
+            f"JSON Schema validation failed at {location}: "
+            f"{error.message}"
+        )
 
     if record.get("schema_version") != SCHEMA_VERSION:
         errors.append(
             f"schema_version must be {SCHEMA_VERSION}"
         )
-
-    if "method_validation_status" in record:
-        if record["method_validation_status"] not in METHOD_VALIDATION_STATES:
-            errors.append("Invalid method_validation_status")
-
-    if "raw_data_availability" in record:
-        if record["raw_data_availability"] not in RAW_DATA_STATES:
-            errors.append("Invalid raw_data_availability")
-
-    if "synthetic_data_declaration" in record:
-        if record["synthetic_data_declaration"] not in SYNTHETIC_DECLARATIONS:
-            errors.append("Invalid synthetic_data_declaration")
-
-    if "reviewer_status" in record:
-        if record["reviewer_status"] not in REVIEWER_STATES:
-            errors.append("Invalid reviewer_status")
-
-    if "evidence_quality" in record:
-        if record["evidence_quality"] not in EVIDENCE_QUALITY_STATES:
-            errors.append("Invalid evidence_quality")
-
-    if "final_review_status" in record:
-        if record["final_review_status"] not in FINAL_REVIEW_STATES:
-            errors.append("Invalid final_review_status")
-
-    if "missing_data" in record and not isinstance(
-        record["missing_data"], list
-    ):
-        errors.append("missing_data must be a list")
-
-    if "deviations" in record and not isinstance(
-        record["deviations"], list
-    ):
-        errors.append("deviations must be a list")
 
     return {
         "valid": len(errors) == 0,
@@ -177,7 +176,7 @@ def validate_record(record: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def completeness(record: dict[str, Any]) -> dict[str, Any]:
+def completeness(record: Any) -> dict[str, Any]:
     """
     Check structural/content completeness.
 
@@ -185,24 +184,37 @@ def completeness(record: dict[str, Any]) -> dict[str, Any]:
     empty list can explicitly mean that no missing data/deviations
     were reported.
     """
+    if not isinstance(record, dict):
+        return {
+            "complete": False,
+            "checks": {"record_is_object": False},
+            "missing_fields": ["record"],
+        }
+
     checks: dict[str, bool] = {}
 
     for field in CONTENT_FIELDS:
+        value = record.get(field)
+
         checks[field] = (
-            record.get(field) is not None
-            and record.get(field) != ""
+            value is not None
+            and value != ""
             and (
                 field in {"missing_data", "deviations"}
-                or record.get(field) != []
+                or value != []
             )
         )
 
+    method_status = record.get("method_validation_status")
     checks["method_validation_status"] = (
-        record.get("method_validation_status") in METHOD_VALIDATION_STATES
+        isinstance(method_status, str)
+        and method_status in METHOD_VALIDATION_STATES
     )
 
+    raw_status = record.get("raw_data_availability")
     checks["raw_data_availability"] = (
-        record.get("raw_data_availability") in RAW_DATA_STATES
+        isinstance(raw_status, str)
+        and raw_status in RAW_DATA_STATES
     )
 
     checks["statistical_reporting"] = not _blank(
@@ -217,9 +229,10 @@ def completeness(record: dict[str, Any]) -> dict[str, Any]:
         record.get("limitations")
     )
 
+    synthetic_declaration = record.get("synthetic_data_declaration")
     checks["synthetic_data_declaration"] = (
-        record.get("synthetic_data_declaration")
-        in SYNTHETIC_DECLARATIONS
+        isinstance(synthetic_declaration, str)
+        and synthetic_declaration in SYNTHETIC_DECLARATIONS
     )
 
     missing_fields = [
@@ -233,18 +246,25 @@ def completeness(record: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def detect_duplicates(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Detect duplicate evidence_id and study_id values."""
+
+
+def detect_duplicates(records: list[Any]) -> list[dict[str, Any]]:
+    """Detect duplicate evidence_id and study_id values safely."""
     duplicates: list[dict[str, Any]] = []
 
     seen_evidence: dict[str, int] = {}
     seen_studies: dict[str, int] = {}
 
     for index, record in enumerate(records):
+        # Ignore records that are not JSON objects.
+        if not isinstance(record, dict):
+            continue
+
         evidence_id = record.get("evidence_id")
         study_id = record.get("study_id")
 
-        if evidence_id:
+        # Only non-empty string IDs are used for duplicate detection.
+        if isinstance(evidence_id, str) and evidence_id.strip():
             if evidence_id in seen_evidence:
                 duplicates.append(
                     {
@@ -257,7 +277,7 @@ def detect_duplicates(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
             else:
                 seen_evidence[evidence_id] = index
 
-        if study_id:
+        if isinstance(study_id, str) and study_id.strip():
             if study_id in seen_studies:
                 duplicates.append(
                     {
@@ -273,7 +293,10 @@ def detect_duplicates(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return duplicates
 
 
-def detect_conflicts(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+
+
+
+def detect_conflicts(records: list[Any]) -> list[dict[str, Any]]:
     """
     Detect inconsistent values for records representing the same study.
 
@@ -284,9 +307,14 @@ def detect_conflicts(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     grouped: dict[str, list[tuple[int, dict[str, Any]]]] = {}
 
     for index, record in enumerate(records):
+        # Ignore records that are not JSON objects.
+        if not isinstance(record, dict):
+            continue
+
         study_id = record.get("study_id")
 
-        if study_id:
+        # Only valid, non-empty string study IDs are grouped.
+        if isinstance(study_id, str) and study_id.strip():
             grouped.setdefault(study_id, []).append(
                 (index, record)
             )
@@ -309,35 +337,31 @@ def detect_conflicts(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 value = record.get(field)
 
                 if value is not None:
-                    values.append(
-                        {
-                            "index": index,
-                            "value": value,
-                        }
-                    )
+                    values.append({
+                        "index": index,
+                        "value": value,
+                    })
 
-            unique_values = sorted(
-                {
-                    str(item["value"])
-                    for item in values
-                }
-            )
+            unique_values = sorted({
+                str(item["value"])
+                for item in values
+            })
 
             if len(unique_values) > 1:
-                conflicts.append(
-                    {
-                        "type": "CONFLICTING_FIELD",
-                        "study_id": study_id,
-                        "field": field,
-                        "values": values,
-                    }
-                )
+                conflicts.append({
+                    "type": "CONFLICTING_FIELD",
+                    "study_id": study_id,
+                    "field": field,
+                    "values": values,
+                })
 
     return conflicts
 
 
+
+
 def classify_record(
-    record: dict[str, Any],
+    record: Any,
     duplicate_ids: set[str] | None = None,
     conflict_study_ids: set[str] | None = None,
 ) -> dict[str, Any]:
@@ -352,6 +376,15 @@ def classify_record(
     validation = validate_record(record)
     completeness_result = completeness(record)
 
+    # Safely handle records that are not JSON objects.
+    if not isinstance(record, dict):
+        return {
+            "evidence_quality": "INSUFFICIENT",
+            "reason": "Record must be a JSON object.",
+            "validation": validation,
+            "completeness": completeness_result,
+        }
+
     evidence_id = record.get("evidence_id")
     study_id = record.get("study_id")
 
@@ -359,11 +392,11 @@ def classify_record(
         quality = "INSUFFICIENT"
         reason = "Record failed structural or state validation."
 
-    elif study_id in conflict_study_ids:
+    elif isinstance(study_id, str) and study_id in conflict_study_ids:
         quality = "CONFLICTING"
         reason = "Conflicting values were detected for the study."
 
-    elif evidence_id in duplicate_ids:
+    elif isinstance(evidence_id, str) and evidence_id in duplicate_ids:
         quality = "NEEDS REVIEW"
         reason = "Duplicate evidence identifier detected."
 
@@ -401,13 +434,19 @@ def classify_record(
         "completeness": completeness_result,
     }
 
-
 def human_review_required(
     classification: dict[str, Any],
-    record: dict[str, Any],
+    record: Any,
 ) -> bool:
     """Determine whether human review is required."""
-    quality = classification["evidence_quality"]
+
+    if not isinstance(record, dict):
+        return True
+
+    if not isinstance(classification, dict):
+        return True
+
+    quality = classification.get("evidence_quality")
 
     if quality in {
         "PARTIAL",
@@ -435,7 +474,9 @@ def human_review_required(
     return False
 
 
-def process_dataset(records: list[dict[str, Any]]) -> dict[str, Any]:
+
+
+def process_dataset(records: list[Any]) -> dict[str, Any]:
     """
     Process a complete evidence dataset and return deterministic JSON.
     """
@@ -470,21 +511,24 @@ def process_dataset(records: list[dict[str, Any]]) -> dict[str, Any]:
             record,
         )
 
+        # Use an empty dictionary for safe output extraction.
+        safe_record = record if isinstance(record, dict) else {}
+
         results.append(
             {
                 "index": index,
-                "evidence_id": record.get("evidence_id"),
-                "study_id": record.get("study_id"),
+                "evidence_id": safe_record.get("evidence_id"),
+                "study_id": safe_record.get("study_id"),
                 "evidence_quality": classification["evidence_quality"],
                 "reason": classification["reason"],
                 "human_review_required": review_required,
                 "validation": classification["validation"],
                 "completeness": classification["completeness"],
-                "synthetic_data_declaration": record.get(
+                "synthetic_data_declaration": safe_record.get(
                     "synthetic_data_declaration"
                 ),
-                "reviewer_status": record.get("reviewer_status"),
-                "final_review_status": record.get(
+                "reviewer_status": safe_record.get("reviewer_status"),
+                "final_review_status": safe_record.get(
                     "final_review_status"
                 ),
             }
@@ -504,6 +548,7 @@ def process_dataset(records: list[dict[str, Any]]) -> dict[str, Any]:
         ),
         "scientific_conclusion": None,
     }
+
 
 
 def compare_candidate_reference(
